@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: billsplitter
+
+# Tomcat configuration
+server:
+  port: 8080
+
+
+
+
