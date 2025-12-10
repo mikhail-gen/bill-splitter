@@ -1,7 +1,9 @@
 package uz.uzum.billsplitter.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uz.uzum.billsplitter.dto.request.BillSplitterRequest;
 import uz.uzum.billsplitter.dto.request.DishRequest;
 import uz.uzum.billsplitter.dto.request.GuestRequest;
@@ -17,14 +19,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@ExtendWith(MockitoExtension.class)
 class BillSplitterServiceTest {
-
+    @InjectMocks
     BillSplitterService service;
-
-    @BeforeEach
-    void setUp() {
-        service = new BillSplitterService();
-    }
 
     @Test
     void shouldCalculateBillForSingleGuestNoSharedDishes() {
