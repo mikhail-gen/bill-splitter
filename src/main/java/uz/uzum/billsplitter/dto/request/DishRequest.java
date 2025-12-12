@@ -1,11 +1,15 @@
 package uz.uzum.billsplitter.dto.request;
 
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 public class DishRequest {
+
+    @NotBlank(message = "Dish name cannot be blank")
     private String name;
+
+    @NotNull(message = "Dish cost cannot be null")
+    @PositiveOrZero(message = "Dish cost cannot be negative")
     private Double cost;
 }

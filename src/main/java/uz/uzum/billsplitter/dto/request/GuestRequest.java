@@ -1,15 +1,18 @@
 package uz.uzum.billsplitter.dto.request;
 
-import lombok.AllArgsConstructor;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class GuestRequest {
+
+    @NotBlank(message = "Guest name cannot be blank")
     private String name;
+
+    @NotNull(message = "Dish list cannot be null")
+    @Valid
     private List<DishRequest> dishes;
 }

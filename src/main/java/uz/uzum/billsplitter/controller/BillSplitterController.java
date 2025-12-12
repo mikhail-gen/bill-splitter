@@ -13,7 +13,7 @@ import uz.uzum.billsplitter.service.BillSplitterService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/bill-splitter")
+@RequestMapping("/bill-splitter/v1/split")
 public class BillSplitterController {
     private final BillSplitterService billSplitterService;
 
