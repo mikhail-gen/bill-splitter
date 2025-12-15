@@ -1,3 +1,4 @@
+/*
 package uz.uzum.billsplitter.service;
 
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith(MockitoExtension.class)
 class BillSplitterServiceTest {
     @InjectMocks
-    BillSplitterService service;
+    BillSplitterServiceImpl service;
 
     @Test
     void shouldCalculateBillForSingleGuestNoSharedDishes() {
@@ -100,5 +101,182 @@ class BillSplitterServiceTest {
 
         assertThatThrownBy(() -> service.splitBill(request))
             .isInstanceOf(NullOrEmptyNameException.class);
+    }
+}*/
+
+
+package uz.uzum.billsplitter.service;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import uz.uzum.billsplitter.constant.enums.ErrorType;
+import uz.uzum.billsplitter.dto.request.BillSplitterRequest;
+import uz.uzum.billsplitter.dto.request.DishRequest;
+import uz.uzum.billsplitter.dto.request.GuestRequest;
+import uz.uzum.billsplitter.dto.response.BillSplitterResponse;
+import uz.uzum.billsplitter.exception.ApplicationException;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@ExtendWith(MockitoExtension.class)
+class BillSplitterServiceTest {
+
+    @InjectMocks
+    BillSplitterServiceImpl service;
+
+    @Test
+    void shouldCalculateBillForSingleGuestNoSharedDishes() {
+        BillSplitterRequest request = BillSplitterRequest.builder()
+            .commissionRate(10.0)
+            .guests(List.of(
+                GuestRequest.builder()
+                    .name("Alice")
+                    .dishes(List.of(
+                        DishRequest.builder()
+                            .name("Pizza")
+                            .cost(100.0)
+                            .build()
+                    ))
+                    .build()
+            ))
+            .sharedDishes(Collections.emptyList())
+            .build();
+
+        BillSplitterResponse response = service.splitBill(request);
+
+        assertThat(response.getGuests()).hasSize(1);
+        assertThat(response.getGuests().get(0).getFinalTotal()).isEqualTo(110.0);
+    }
+
+    @Test
+    void shouldCalculateBillWithSharedDishesMultipleGuests() {
+        BillSplitterRequest request = BillSplitterRequest.builder()
+            .commissionRate(10.0)
+            .guests(List.of(
+                GuestRequest.builder()
+                    .name("Alice")
+                    .dishes(List.of(
+                        DishRequest.builder()
+                            .name("Pizza")
+                            .cost(100.0)
+                            .build()
+                    ))
+                    .build(),
+                GuestRequest.builder()
+                    .name("Bob")
+                    .dishes(List.of(
+                        DishRequest.builder()
+                            .name("Salad")
+                            .cost(50.0)
+                            .build()
+                    ))
+                    .build()
+            ))
+            .sharedDishes(List.of(
+                DishRequest.builder()
+                    .name("Wine")
+                    .cost(200.0)
+                    .build()
+            ))
+            .build();
+
+        BillSplitterResponse response = service.splitBill(request);
+
+        assertThat(response.getGuests()).hasSize(2);
+        assertThat(response.getGuests().get(0).getFinalTotal()).isEqualTo(220.0);
+        assertThat(response.getGuests().get(1).getFinalTotal()).isEqualTo(165.0);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenNoGuestsProvided() {
+        BillSplitterRequest request = BillSplitterRequest.builder()
+            .commissionRate(10.0)
+            .guests(Collections.emptyList())
+            .build();
+
+        assertThatThrownBy(() -> service.splitBill(request))
+            .isInstanceOf(ApplicationException.class)
+            .satisfies(ex -> {
+                ApplicationException e = (ApplicationException) ex;
+                assertThat(e.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                assertThat(e.getErrorType()).isEqualTo(ErrorType.VALIDATION);
+            });
+    }
+
+    @Test
+    void shouldThrowExceptionForInvalidCommissionRate() {
+        BillSplitterRequest request = BillSplitterRequest.builder()
+            .commissionRate(150.0)
+            .guests(List.of(
+                GuestRequest.builder()
+                    .name("Alice")
+                    .dishes(List.of())
+                    .build()
+            ))
+            .build();
+
+        assertThatThrownBy(() -> service.splitBill(request))
+            .isInstanceOf(ApplicationException.class)
+            .satisfies(ex -> {
+                ApplicationException e = (ApplicationException) ex;
+                assertThat(e.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                assertThat(e.getErrorType()).isEqualTo(ErrorType.VALIDATION);
+            });
+    }
+
+    @Test
+    void shouldThrowExceptionForNegativeDishCost() {
+        BillSplitterRequest request = BillSplitterRequest.builder()
+            .commissionRate(10.0)
+            .guests(List.of(
+                GuestRequest.builder()
+                    .name("Alice")
+                    .dishes(List.of(
+                        DishRequest.builder()
+                            .name("Pizza")
+                            .cost(-50.0)
+                            .build()
+                    ))
+                    .build()
+            ))
+            .sharedDishes(Collections.emptyList())
+            .build();
+
+        assertThatThrownBy(() -> service.splitBill(request))
+            .isInstanceOf(ApplicationException.class)
+            .satisfies(ex -> {
+                ApplicationException e = (ApplicationException) ex;
+                assertThat(e.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                assertThat(e.getErrorType()).isEqualTo(ErrorType.VALIDATION);
+            });
+    }
+
+    @Test
+    void shouldThrowExceptionForNullOrEmptyGuestName() {
+        BillSplitterRequest request = BillSplitterRequest.builder()
+            .commissionRate(10.0)
+            .guests(List.of(
+                GuestRequest.builder()
+                    .name("")
+                    .dishes(List.of())
+                    .build()
+            ))
+            .sharedDishes(Collections.emptyList())
+            .build();
+
+        assertThatThrownBy(() -> service.splitBill(request))
+            .isInstanceOf(ApplicationException.class)
+            .satisfies(ex -> {
+                ApplicationException e = (ApplicationException) ex;
+                assertThat(e.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                assertThat(e.getErrorType()).isEqualTo(ErrorType.VALIDATION);
+            });
     }
 }

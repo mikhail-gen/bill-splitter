@@ -1,12 +1,19 @@
 package uz.uzum.billsplitter.dto.request;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
 
 import java.util.List;
 
 @Data
+@SuperBuilder
+@Jacksonized
 public class BillSplitterRequest {
 
     @NotEmpty(message = "Guest list cannot be empty")
