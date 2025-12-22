@@ -10,7 +10,8 @@ public class RestClientConfig {
     @Bean
     public RestClient restClient() {
         return RestClient.builder()
-            .baseUrl("http://localhost:8080/gcp/users")
+           //TBD
+            // .defaultStatusHandler(ResponseErrorHandler)
             .build();
     }
 }

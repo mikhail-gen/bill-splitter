@@ -17,7 +17,7 @@ import uz.uzum.billsplitter.service.RequestFromGspService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/bill-splitter/v1/split")
+@RequestMapping("/api/bill-splitter/v1/split")
 public class BillSplitterController {
     private final BillSplitterService billSplitterService;
     private final RequestFromGspService requestFromGspService;

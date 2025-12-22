@@ -16,10 +16,11 @@ public class GspAdapter {
 
     RestClient restClient;
 
+
     public CreateUserResponseDto  getUserInfo(Long id) {
         return restClient
             .get()
-            .uri("/by-id/{id}", id)
+            .uri("http://localhost:8080/api/gcp/users/by-id/{id}", id)
             .retrieve()
             .body(CreateUserResponseDto.class);
     }
